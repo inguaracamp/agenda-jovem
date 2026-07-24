@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+enum Role {
+  LEADER
+  ADMIN
+}
+
+enum EventType {
+  CULTO
+  FESTIVIDADE
+}
+
+model Church {
+  id           String   @id @default(cuid())
+  name         String
+  city         String
+  address      String
+  neighborhood String
+  cep          String
+  color        String
+  createdAt    DateTime @default(now())
+  users        User[]
+  events       Event[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(LEADER)
+  churchId     String?
+  church       Church?  @relation(fields: [churchId], references: [id])
+  createdAt    DateTime @default(now())
+  events       Event[]
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  type        EventType @default(CULTO)
+  churchId    String
+  church      Church    @relation(fields: [churchId], references: [id])
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  startsAt    DateTime
+  endsAt      DateTime
+  location    String
+  description String
+  posterUrl   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
