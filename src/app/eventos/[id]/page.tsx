@@ -4,11 +4,18 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { formatEventRange } from "@/lib/date";
-import { formatChurchAddress, mapsUrl, wazeUrl } from "@/lib/address";
+import {
+  eventNavigationQuery,
+  formatChurchAddress,
+  mapsUrl,
+  wazeUrl,
+} from "@/lib/address";
+import { getAppUrl, whatsappShareUrl } from "@/lib/app-url";
 import { eventTypeLabels } from "@/lib/validators";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { DeleteEventButton } from "@/components/delete-event-button";
+import { cn } from "@/lib/utils";
 import {
   CalendarPlus,
   MapPin,
@@ -30,7 +37,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function EventoDetailPage({ params }: Props) {
   const { id } = await params;
-  const [session, event] = await Promise.all([
+  const [session, event, appUrl] = await Promise.all([
     auth(),
     prisma.event.findUnique({
       where: { id },
@@ -39,6 +46,7 @@ export default async function EventoDetailPage({ params }: Props) {
         createdBy: { select: { id: true, name: true } },
       },
     }),
+    getAppUrl(),
   ]);
 
   if (!event) notFound();
@@ -48,11 +56,13 @@ export default async function EventoDetailPage({ params }: Props) {
     (session.user.role === "ADMIN" || session.user.id === event.createdById);
 
   const churchAddress = formatChurchAddress(event.church);
-  const googleMaps = mapsUrl(event.church);
-  const waze = wazeUrl(event.church);
+  const navQuery = eventNavigationQuery(event.church, event.location);
+  const googleMaps = mapsUrl(navQuery);
+  const waze = wazeUrl(navQuery);
 
-  const shareText = encodeURIComponent(
-    `${event.title} — ${event.church.name}\n${formatEventRange(event.startsAt, event.endsAt)}\n${churchAddress}\n`,
+  const eventUrl = `${appUrl}/eventos/${event.id}`;
+  const whatsappHref = whatsappShareUrl(
+    `${event.title} — ${event.church.name}\n${formatEventRange(event.startsAt, event.endsAt)}\n${churchAddress}\n\n${eventUrl}`,
   );
 
   return (
@@ -117,18 +127,24 @@ export default async function EventoDetailPage({ params }: Props) {
             </p>
 
             <div className="flex flex-wrap gap-2">
-              <Button asChild size="sm">
-                <a href={googleMaps} target="_blank" rel="noreferrer">
-                  <Navigation className="size-4" />
-                  Abrir no Maps
-                </a>
-              </Button>
-              <Button asChild size="sm" variant="outline">
-                <a href={waze} target="_blank" rel="noreferrer">
-                  <Navigation className="size-4" />
-                  Abrir no Waze
-                </a>
-              </Button>
+              <a
+                href={googleMaps}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(buttonVariants({ size: "sm" }))}
+              >
+                <Navigation className="size-4" />
+                Abrir no Maps
+              </a>
+              <a
+                href={waze}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+              >
+                <Navigation className="size-4" />
+                Abrir no Waze
+              </a>
             </div>
           </div>
 
@@ -143,22 +159,22 @@ export default async function EventoDetailPage({ params }: Props) {
           </p>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <Button asChild>
-              <a href={`/api/events/${event.id}/ics`}>
-                <CalendarPlus className="size-4" />
-                Adicionar à minha agenda
-              </a>
-            </Button>
-            <Button asChild variant="outline">
-              <a
-                href={`https://wa.me/?text=${shareText}${encodeURIComponent(process.env.NEXT_PUBLIC_APP_URL || "")}/eventos/${event.id}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Share2 className="size-4" />
-                WhatsApp
-              </a>
-            </Button>
+            <a
+              href={`/api/events/${event.id}/ics`}
+              className={cn(buttonVariants())}
+            >
+              <CalendarPlus className="size-4" />
+              Adicionar à minha agenda
+            </a>
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonVariants({ variant: "outline" }))}
+            >
+              <Share2 className="size-4" />
+              WhatsApp
+            </a>
           </div>
         </div>
 
