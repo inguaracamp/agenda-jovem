@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { auth } from "@/auth";
+import { getAppUrl, whatsappShareUrl } from "@/lib/app-url";
+import { siteWhatsAppMessage } from "@/lib/share";
 import { EventsCalendar } from "@/components/events-calendar";
 import { EventCard } from "@/components/event-card";
 import { PostEventButton } from "@/components/post-event-button";
+import { AddHomeShortcutButton } from "@/components/add-home-shortcut-button";
 import { Button } from "@/components/ui/button";
-import { CalendarPlus, Rss } from "lucide-react";
+import { CalendarPlus, Rss, Share2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +18,7 @@ export default async function HomePage() {
 
   const now = new Date();
 
-  const [events, churches, ongoing, upcoming] = await Promise.all([
+  const [events, churches, ongoing, upcoming, appUrl] = await Promise.all([
     prisma.event.findMany({
       include: { church: true },
       orderBy: { startsAt: "asc" },
@@ -35,7 +38,10 @@ export default async function HomePage() {
       orderBy: { startsAt: "asc" },
       take: 4,
     }),
+    getAppUrl(),
   ]);
+
+  const whatsappHref = whatsappShareUrl(siteWhatsAppMessage(appUrl));
 
   return (
     <div className="space-y-10">
@@ -52,30 +58,26 @@ export default async function HomePage() {
             igreja, baixe o cartaz e assine a agenda no celular.
           </p>
           <div className="flex flex-wrap gap-3">
-            {canPost ? (
-              <PostEventButton />
-            ) : (
-              <Button asChild>
-                <Link href="/assinar">
-                  <Rss className="size-4" />
-                  Assinar no celular
-                </Link>
-              </Button>
-            )}
+            <PostEventButton authenticated={canPost} />
             <Button asChild variant="outline">
               <Link href="/eventos">
                 <CalendarPlus className="size-4" />
                 Ver próximos eventos
               </Link>
             </Button>
-            {canPost && (
-              <Button asChild variant="outline">
-                <Link href="/assinar">
-                  <Rss className="size-4" />
-                  Assinar agenda
-                </Link>
-              </Button>
-            )}
+            <Button asChild variant="outline">
+              <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <Share2 className="size-4" />
+                Divulgar no WhatsApp
+              </a>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/assinar">
+                <Rss className="size-4" />
+                Assinar no celular
+              </Link>
+            </Button>
+            <AddHomeShortcutButton />
           </div>
         </div>
 
@@ -101,7 +103,12 @@ export default async function HomePage() {
             Ver lista completa
           </Link>
         </div>
-        <EventsCalendar events={events} churches={churches} canPost={canPost} />
+        <EventsCalendar
+          events={events}
+          churches={churches}
+          canPost
+          authenticated={canPost}
+        />
       </section>
 
       {ongoing.length > 0 && (
@@ -127,7 +134,7 @@ export default async function HomePage() {
           <h2 className="font-heading text-2xl font-semibold tracking-tight">
             Próximos eventos
           </h2>
-          {canPost && <PostEventButton size="sm" />}
+          <PostEventButton size="sm" authenticated={canPost} />
         </div>
         {upcoming.length === 0 ? (
           <div className="rounded-2xl border border-dashed px-6 py-10 text-center">
@@ -136,9 +143,9 @@ export default async function HomePage() {
                 ? "Nenhum outro evento futuro no momento."
                 : "Nenhum evento futuro ainda. Líderes, publiquem o próximo culto!"}
             </p>
-            {canPost && ongoing.length === 0 && (
+            {ongoing.length === 0 && (
               <div className="mt-4 flex justify-center">
-                <PostEventButton />
+                <PostEventButton authenticated={canPost} />
               </div>
             )}
           </div>

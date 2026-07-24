@@ -11,4 +11,4 @@ alwaysApply: true
   1. Confirme que `origin` aponta para `inguaracamp/agenda-jovem`.
   2. Commit (se houver mudanças) e `git push origin HEAD`.
   3. Deploy de produção na Vercel do projeto `agenda-jovem` (`vercel --prod` ou deploy automático do Git).
-- Produção esperada: `https://agenda-jovem-ruby.vercel.app/` (e aliases do mesmo projeto).
+- Produção esperada: `https://agendas-jovens.vercel.app/` (e aliases do mesmo projeto).

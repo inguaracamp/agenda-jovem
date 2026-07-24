@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { RegisterForm } from "@/components/register-form";
 
 export const metadata = { title: "Criar conta" };
@@ -14,7 +15,13 @@ export default function CadastroPage() {
         </p>
       </div>
       <div className="rounded-2xl border bg-white/80 p-6 shadow-sm">
-        <RegisterForm />
+        <Suspense
+          fallback={
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          }
+        >
+          <RegisterForm />
+        </Suspense>
       </div>
     </div>
   );

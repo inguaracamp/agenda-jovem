@@ -1,11 +1,12 @@
 import { CopyFeedButton } from "@/components/copy-feed-button";
+import { AddHomeShortcutButton } from "@/components/add-home-shortcut-button";
 import { Button } from "@/components/ui/button";
 import { getAppUrl } from "@/lib/app-url";
 import {
   outlookOfficeSubscribeUrl,
   outlookSubscribeUrl,
 } from "@/lib/ics";
-import { CalendarPlus, Rss, Smartphone } from "lucide-react";
+import { CalendarPlus, Home, Rss, Smartphone } from "lucide-react";
 
 export const metadata = { title: "Assinar agenda" };
 export const dynamic = "force-dynamic";
@@ -43,6 +44,22 @@ export default async function AssinarPage() {
           produção na Vercel.
         </p>
       )}
+
+      <div className="space-y-3 rounded-2xl border bg-white/80 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <p className="inline-flex items-center gap-2 text-sm font-medium">
+              <Home className="size-4 text-teal-800" />
+              Atalho na tela do celular
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Adicione o AgendaJovem na tela inicial. O ícone abre o site
+              direto, como um app.
+            </p>
+          </div>
+          <AddHomeShortcutButton className="shrink-0" />
+        </div>
+      </div>
 
       <div className="space-y-3 rounded-2xl border bg-white/80 p-5">
         <p className="text-sm font-medium">Link do calendário</p>

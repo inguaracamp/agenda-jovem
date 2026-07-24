@@ -15,7 +15,7 @@ export default async function EventosPage({
 }) {
   const { igreja } = await searchParams;
   const session = await auth();
-  const canPost = Boolean(session?.user);
+  const isLoggedIn = Boolean(session?.user);
 
   const now = new Date();
 
@@ -44,7 +44,8 @@ export default async function EventosPage({
         events={events}
         churches={churches}
         initialChurchId={igreja}
-        canPost={canPost}
+        canPost
+        authenticated={isLoggedIn}
       />
     </div>
   );

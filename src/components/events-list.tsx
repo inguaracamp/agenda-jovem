@@ -13,6 +13,7 @@ type Props = {
   churches: Church[];
   initialChurchId?: string;
   canPost?: boolean;
+  authenticated?: boolean;
 };
 
 export function EventsList({
@@ -20,6 +21,7 @@ export function EventsList({
   churches,
   initialChurchId,
   canPost = false,
+  authenticated = false,
 }: Props) {
   const [churchId, setChurchId] = useState(initialChurchId ?? "all");
 
@@ -39,7 +41,13 @@ export function EventsList({
           value={churchId}
           onChange={setChurchId}
         />
-        {canPost && <PostEventButton size="sm" className="shrink-0" />}
+        {canPost && (
+          <PostEventButton
+            size="sm"
+            className="shrink-0"
+            authenticated={authenticated}
+          />
+        )}
       </div>
 
       {filtered.length === 0 ? (

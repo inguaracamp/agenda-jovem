@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,8 @@ const CHURCH_COLORS = [
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/painel";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLeader, setIsLeader] = useState(true);
@@ -76,11 +78,13 @@ export function RegisterForm() {
       });
 
       if (login?.error) {
-        router.push("/login");
+        router.push(
+          `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`,
+        );
         return;
       }
 
-      router.push("/painel");
+      router.push(callbackUrl);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar conta");
@@ -88,6 +92,8 @@ export function RegisterForm() {
       setLoading(false);
     }
   }
+
+  const loginHref = `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -242,7 +248,7 @@ export function RegisterForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         Já tem conta?{" "}
-        <Link href="/login" className="font-medium text-teal-800 hover:underline">
+        <Link href={loginHref} className="font-medium text-teal-800 hover:underline">
           Entrar
         </Link>
       </p>

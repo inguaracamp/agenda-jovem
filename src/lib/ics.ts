@@ -95,7 +95,7 @@ export function getBaseUrl(request?: Request) {
     const url = new URL(request.url);
     return `${url.protocol}//${url.host}`;
   }
-  return "http://localhost:3000";
+  return "https://agendas-jovens.vercel.app";
 }
 
 export function outlookSubscribeUrl(feedUrl: string, name = "AgendaJovem") {

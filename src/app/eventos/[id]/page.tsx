@@ -31,8 +31,36 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const event = await prisma.event.findUnique({ where: { id } });
-  return { title: event?.title ?? "Evento" };
+  const event = await prisma.event.findUnique({
+    where: { id },
+    include: { church: true },
+  });
+
+  if (!event) return { title: "Evento" };
+
+  const description = [
+    event.church.name,
+    formatEventRange(event.startsAt, event.endsAt),
+    event.location,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return {
+    title: event.title,
+    description,
+    openGraph: {
+      title: `${event.title} — AgendaJovem`,
+      description,
+      ...(event.posterUrl ? { images: [{ url: event.posterUrl }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image" as const,
+      title: `${event.title} — AgendaJovem`,
+      description,
+      ...(event.posterUrl ? { images: [event.posterUrl] } : {}),
+    },
+  };
 }
 
 export default async function EventoDetailPage({ params }: Props) {
@@ -62,7 +90,15 @@ export default async function EventoDetailPage({ params }: Props) {
 
   const eventUrl = `${appUrl}/eventos/${event.id}`;
   const whatsappHref = whatsappShareUrl(
-    `${event.title} — ${event.church.name}\n${formatEventRange(event.startsAt, event.endsAt)}\n${churchAddress}\n\n${eventUrl}`,
+    [
+      `✨ *${event.title}*`,
+      event.church.name,
+      formatEventRange(event.startsAt, event.endsAt),
+      churchAddress,
+      "",
+      "Vem com a gente — detalhes e cartaz aqui:",
+      eventUrl,
+    ].join("\n"),
   );
 
   return (

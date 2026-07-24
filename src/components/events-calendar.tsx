@@ -17,6 +17,7 @@ type Props = {
   churches: Church[];
   initialChurchId?: string;
   canPost?: boolean;
+  authenticated?: boolean;
 };
 
 function useIsMobile(breakpoint = 640) {
@@ -38,6 +39,7 @@ export function EventsCalendar({
   churches,
   initialChurchId,
   canPost = false,
+  authenticated = false,
 }: Props) {
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -69,14 +71,20 @@ export function EventsCalendar({
           value={churchId}
           onChange={setChurchId}
         />
-        {canPost && <PostEventButton size="sm" className="shrink-0" />}
+        {canPost && (
+          <PostEventButton
+            size="sm"
+            className="shrink-0"
+            authenticated={authenticated}
+          />
+        )}
       </div>
 
       <div className="agenda-calendar overflow-hidden rounded-2xl border border-border/70 bg-card p-2 sm:p-4">
         <FullCalendar
           key={isMobile ? "mobile" : "desktop"}
           plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
-          initialView={isMobile ? "listMonth" : "dayGridMonth"}
+          initialView="dayGridMonth"
           locale="pt-br"
           headerToolbar={
             isMobile
