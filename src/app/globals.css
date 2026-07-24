@@ -131,3 +131,137 @@
     font-family: var(--font-heading);
   }
 }
+
+/* FullCalendar — layout mobile */
+.agenda-calendar .fc {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+.agenda-calendar .fc .fc-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.agenda-calendar .fc .fc-toolbar-chunk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.agenda-calendar .fc .fc-toolbar-title {
+  font-family: var(--font-heading), ui-serif, Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.agenda-calendar .fc .fc-button {
+  border-radius: 0.5rem;
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  text-transform: capitalize;
+  box-shadow: none;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-height: 2rem;
+}
+
+.agenda-calendar .fc .fc-button-primary:not(:disabled) {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.agenda-calendar .fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: color-mix(in oklab, var(--primary) 85%, black);
+  border-color: transparent;
+}
+
+.agenda-calendar .fc .fc-prev-button,
+.agenda-calendar .fc .fc-next-button {
+  min-width: 2.25rem;
+  padding-inline: 0.5rem;
+}
+
+.agenda-calendar .fc .fc-button-group {
+  gap: 0.35rem;
+}
+
+.agenda-calendar .fc .fc-button-group > .fc-button {
+  margin: 0;
+  border-radius: 0.5rem !important;
+}
+
+.agenda-calendar .fc .fc-col-header-cell-cushion {
+  padding: 0.4rem 0.15rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+
+.agenda-calendar .fc .fc-daygrid-day-number {
+  padding: 0.35rem;
+  font-size: 0.75rem;
+}
+
+.agenda-calendar .fc .fc-event {
+  cursor: pointer;
+  border: 0;
+  border-radius: 0.35rem;
+  padding: 0 0.15rem;
+  font-size: 0.65rem;
+}
+
+.agenda-calendar .fc .fc-list {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .agenda-calendar .fc .fc-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .agenda-calendar .fc .fc-toolbar-chunk {
+    justify-content: flex-start;
+  }
+
+  .agenda-calendar .fc .fc-toolbar-chunk:nth-child(2) {
+    justify-content: center;
+  }
+
+  .agenda-calendar .fc .fc-toolbar-chunk:last-child {
+    justify-content: flex-end;
+  }
+
+  .agenda-calendar .fc .fc-toolbar-title {
+    font-size: 1.25rem;
+  }
+
+  .agenda-calendar .fc .fc-col-header-cell-cushion {
+    font-size: 0.75rem;
+    padding-block: 0.5rem;
+  }
+
+  .agenda-calendar .fc .fc-daygrid-day-number {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  }
+
+  .agenda-calendar .fc .fc-event {
+    font-size: 0.75rem;
+    padding-inline: 0.25rem;
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -19,6 +19,20 @@ type Props = {
   canPost?: boolean;
 };
 
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 export function EventsCalendar({
   events,
   churches,
@@ -26,6 +40,7 @@ export function EventsCalendar({
   canPost = false,
 }: Props) {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [churchId, setChurchId] = useState(initialChurchId ?? "all");
 
   const filtered = useMemo(
@@ -48,32 +63,56 @@ export function EventsCalendar({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <ChurchFilter
           churches={churches}
           value={churchId}
           onChange={setChurchId}
         />
-        {canPost && (
-          <PostEventButton size="sm" className="shrink-0" />
-        )}
+        {canPost && <PostEventButton size="sm" className="shrink-0" />}
       </div>
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-4 [&_.fc]:font-sans [&_.fc-button]:rounded-lg [&_.fc-button]:border-border [&_.fc-button]:bg-background [&_.fc-button]:capitalize [&_.fc-button-primary:not(:disabled)]:bg-primary [&_.fc-button-primary:not(:disabled)]:border-primary [&_.fc-col-header-cell-cushion]:py-2 [&_.fc-col-header-cell-cushion]:text-xs [&_.fc-col-header-cell-cushion]:font-semibold [&_.fc-col-header-cell-cushion]:uppercase [&_.fc-col-header-cell-cushion]:tracking-wide [&_.fc-col-header-cell-cushion]:text-muted-foreground [&_.fc-daygrid-day-number]:p-2 [&_.fc-daygrid-day-number]:text-sm [&_.fc-event]:cursor-pointer [&_.fc-event]:rounded-md [&_.fc-event]:border-0 [&_.fc-event]:px-1 [&_.fc-event]:text-xs [&_.fc-toolbar-title]:font-heading [&_.fc-toolbar-title]:text-xl [&_.fc-toolbar-title]:font-semibold">
+
+      <div className="agenda-calendar overflow-hidden rounded-2xl border border-border/70 bg-card p-2 sm:p-4">
         <FullCalendar
+          key={isMobile ? "mobile" : "desktop"}
           plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
+          initialView={isMobile ? "listMonth" : "dayGridMonth"}
           locale="pt-br"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,listMonth",
-          }}
+          headerToolbar={
+            isMobile
+              ? {
+                  start: "prev,next",
+                  center: "title",
+                  end: "today",
+                }
+              : {
+                  left: "prev,next today",
+                  center: "title",
+                  right: "dayGridMonth,listMonth",
+                }
+          }
+          footerToolbar={
+            isMobile
+              ? {
+                  center: "dayGridMonth,listMonth",
+                }
+              : false
+          }
+          titleFormat={
+            isMobile
+              ? { year: "numeric", month: "short" }
+              : { year: "numeric", month: "long" }
+          }
           buttonText={{
             today: "Hoje",
             month: "Mês",
             list: "Lista",
           }}
           height="auto"
+          contentHeight="auto"
+          stickyHeaderDates={false}
+          dayMaxEvents={isMobile ? 2 : true}
+          moreLinkClick="popover"
           events={fcEvents}
           eventClick={(info) => {
             info.jsEvent.preventDefault();
@@ -82,9 +121,11 @@ export function EventsCalendar({
           eventContent={(arg) => (
             <div className="overflow-hidden px-1 py-0.5 leading-tight">
               <div className="truncate font-medium">{arg.event.title}</div>
-              <div className="truncate opacity-80">
-                {arg.event.extendedProps.church}
-              </div>
+              {!isMobile && (
+                <div className="truncate opacity-80">
+                  {arg.event.extendedProps.church}
+                </div>
+              )}
             </div>
           )}
         />

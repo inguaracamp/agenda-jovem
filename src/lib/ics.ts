@@ -1,4 +1,5 @@
 import ical, { ICalCalendarMethod } from "ical-generator";
+import { DateTime } from "luxon";
 import type { Event, Church } from "@prisma/client";
 import { formatChurchAddress } from "@/lib/address";
 
@@ -10,12 +11,14 @@ const PRODID = {
   language: "PT-BR" as const,
 };
 
+const TZ = "America/Sao_Paulo";
+
 export function buildEventIcs(event: EventWithChurch, baseUrl: string) {
   const calendar = ical({
     name: "AgendaJovem",
     prodId: PRODID,
     method: ICalCalendarMethod.PUBLISH,
-    timezone: "America/Sao_Paulo",
+    timezone: TZ,
   });
 
   addEvent(calendar, event, baseUrl);
@@ -28,8 +31,10 @@ export function buildFeedIcs(events: EventWithChurch[], baseUrl: string) {
     description: "Agenda compartilhada de cultos e eventos da rede de jovens",
     prodId: PRODID,
     method: ICalCalendarMethod.PUBLISH,
-    timezone: "America/Sao_Paulo",
+    timezone: TZ,
     ttl: 60 * 60,
+    source: `${baseUrl}/api/calendar.ics`,
+    url: `${baseUrl}/api/calendar.ics`,
   });
 
   for (const event of events) {
@@ -37,6 +42,10 @@ export function buildFeedIcs(events: EventWithChurch[], baseUrl: string) {
   }
 
   return calendar;
+}
+
+function toZoned(date: Date) {
+  return DateTime.fromJSDate(date, { zone: "utc" }).setZone(TZ);
 }
 
 function addEvent(
@@ -59,12 +68,14 @@ function addEvent(
 
   calendar.createEvent({
     id: `${event.id}@agenda-jovem`,
-    start: event.startsAt,
-    end: event.endsAt,
+    start: toZoned(event.startsAt),
+    end: toZoned(event.endsAt),
+    timezone: TZ,
     summary: `${event.title} — ${event.church.name}`,
     description,
     location: churchAddress || event.location,
     url: detailUrl,
+    stamp: DateTime.utc(),
   });
 }
 
@@ -77,9 +88,31 @@ export function getBaseUrl(request?: Request) {
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
   }
+  if (process.env.AUTH_URL) {
+    return process.env.AUTH_URL.replace(/\/$/, "");
+  }
   if (request) {
     const url = new URL(request.url);
     return `${url.protocol}//${url.host}`;
   }
   return "http://localhost:3000";
+}
+
+export function outlookSubscribeUrl(feedUrl: string, name = "AgendaJovem") {
+  const params = new URLSearchParams({
+    url: feedUrl,
+    name,
+  });
+  return `https://outlook.live.com/calendar/0/addfromweb?${params.toString()}`;
+}
+
+export function outlookOfficeSubscribeUrl(
+  feedUrl: string,
+  name = "AgendaJovem",
+) {
+  const params = new URLSearchParams({
+    url: feedUrl,
+    name,
+  });
+  return `https://outlook.office.com/calendar/0/addfromweb?${params.toString()}`;
 }

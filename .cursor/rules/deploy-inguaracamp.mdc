@@ -1,0 +1,14 @@
+---
+description: Sempre publicar neste projeto no GitHub inguaracamp e Vercel
+alwaysApply: true
+---
+
+# Deploy deste projeto
+
+- Remote GitHub obrigatório: `https://github.com/inguaracamp/agenda-jovem.git` (conta **inguaracamp**).
+- Nunca faça push para outros remotes/contas (ex.: `nael47`) neste repositório.
+- Ao pedir para "subir", "publicar" ou "deploy":
+  1. Confirme que `origin` aponta para `inguaracamp/agenda-jovem`.
+  2. Commit (se houver mudanças) e `git push origin HEAD`.
+  3. Deploy de produção na Vercel do projeto `agenda-jovem` (`vercel --prod` ou deploy automático do Git).
+- Produção esperada: `https://agenda-jovem-ruby.vercel.app/` (e aliases do mesmo projeto).
